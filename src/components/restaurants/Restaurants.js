@@ -12,7 +12,6 @@ class Restaurants extends Component {
   }
 
   render() {
-    console.log(this.props)
     return(
       <ul>
         {this.renderRestaurants()}

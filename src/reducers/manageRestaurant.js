@@ -2,12 +2,14 @@
 import cuid from 'cuid';
 export const cuidFn = cuid;
 
-export default function manageRestaurants(state = {restaurants: []}, action) {
+export default function manageRestaurants(state = {
+    restaurants: [],
+    reviews: [],
+}, action) {
     console.log(state,action)
     let restaurant;
     let idx;
     let review;
-    let filteredReviews = [];
     switch(action.type){
         case "CREATE_RESTAURANT":
             restaurant = {
@@ -28,48 +30,28 @@ export default function manageRestaurants(state = {restaurants: []}, action) {
         case "CREATE_REVIEW":
             console.log("creating review")
             console.log(state, action)
-            let filtered = state.restaurants.filter(r => r.id === action.payload.restaurantId)
-            let idx = state.restaurants.findIndex(restaurant => restaurant.id === action.payload.restaurantId)
-            console.log(idx)
-            // fix so that multiple reviews can be added
-            if (filtered.reviews){
-                filteredReviews = [
-                    ...filtered.reviews
-                ]
+            const newReview = {
+                text: action.payload.text,
+                restaurantId: action.payload.restaurantId,
+                id: cuidFn()
             }
-            filtered = {
-                text: filtered[0].text,
-                id: filtered[0].id,
-                reviews: [
-                    ...filteredReviews,
-                    {
-                        text: action.payload.text,
-                        id: cuid(),
-                        restaurantId: action.payload.restaurantId
-                    }
-                ]
+            if(state.reviews === undefined){
+                state.reviews = []
             }
-            console.log(filtered)
-            const updatedRestaurants = [
-                ...state.restaurants.slice(0, idx),
-                filtered,
-                ...state.restaurants.slice(idx + 1, state.restaurants.length)
-            ];
-            return {
-                restaurants: updatedRestaurants
-            };
-            // spread the state
-            // spread the restaurants
-            // spread the current restaurant
-            // create a new review obj from the payload 
-            // update the selected restaurant obj to include reviews
-            // insert this review into the list of reviews
-            // return total state
+            const newState = { ...state,
+                reviews: [...state.reviews, newReview]
+              }
+              
+            return newState;
         case "UPDATE_REVIEW":
             return state;
         case "DELETE_REVIEW":
-            return state;
-        default:
+            console.log('deleting review', action.payload)
+            const filteredReviews = state.reviews.filter(review => review.id !== action.payload)
+            return { ...state,
+                reviews: [...filteredReviews]
+              }
+            default:
             return state;
     }
 }

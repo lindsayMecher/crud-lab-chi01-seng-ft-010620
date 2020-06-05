@@ -21,6 +21,10 @@ class ReviewInput extends Component {
     event.preventDefault()
     console.log(this.props)
     this.props.createReview(this.state)
+    this.setState({
+      text: "",
+      restaurantId: ""
+    })
   }
 
   render() {
