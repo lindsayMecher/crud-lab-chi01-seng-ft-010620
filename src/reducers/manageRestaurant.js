@@ -5,7 +5,9 @@ export const cuidFn = cuid;
 export default function manageRestaurants(state = {restaurants: []}, action) {
     console.log(state,action)
     let restaurant;
+    let idx;
     let review;
+    let filteredReviews = [];
     switch(action.type){
         case "CREATE_RESTAURANT":
             restaurant = {
@@ -27,15 +29,35 @@ export default function manageRestaurants(state = {restaurants: []}, action) {
             console.log("creating review")
             console.log(state, action)
             let filtered = state.restaurants.filter(r => r.id === action.payload.restaurantId)
+            let idx = state.restaurants.findIndex(restaurant => restaurant.id === action.payload.restaurantId)
+            console.log(idx)
+            // fix so that multiple reviews can be added
+            if (filtered.reviews){
+                filteredReviews = [
+                    ...filtered.reviews
+                ]
+            }
             filtered = {
-                text: filtered.text,
-                id: filtered.id,
+                text: filtered[0].text,
+                id: filtered[0].id,
                 reviews: [
-                    {text: action.payload.text,
-                        id: cuid()
+                    ...filteredReviews,
+                    {
+                        text: action.payload.text,
+                        id: cuid(),
+                        restaurantId: action.payload.restaurantId
                     }
                 ]
             }
+            console.log(filtered)
+            const updatedRestaurants = [
+                ...state.restaurants.slice(0, idx),
+                filtered,
+                ...state.restaurants.slice(idx + 1, state.restaurants.length)
+            ];
+            return {
+                restaurants: updatedRestaurants
+            };
             // spread the state
             // spread the restaurants
             // spread the current restaurant
@@ -43,8 +65,6 @@ export default function manageRestaurants(state = {restaurants: []}, action) {
             // update the selected restaurant obj to include reviews
             // insert this review into the list of reviews
             // return total state
-            debugger
-            return state;
         case "UPDATE_REVIEW":
             return state;
         case "DELETE_REVIEW":
